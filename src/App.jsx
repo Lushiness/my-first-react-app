@@ -1,59 +1,41 @@
-import { useState } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react'; //react hook
+import './App.css';
 
 function App() {
-  const [todos, setTodos] = useState([])        // array of tasks
-  const [inputValue, setInputValue] = useState('') // what user types
+  const [time,setTime] = useState(0); // setting the initial time to 0 and the setTime is the function
+  const [running,setRunning] = useState(false);
 
-  // Function to add a new todo
-  const addTodo = () => {
-    if (inputValue.trim() === '') return
-    setTodos([...todos, { id: Date.now(), text: inputValue, completed: false }])
-    setInputValue('')
-  }
+  useEffect(()=>{
+    let interval;
+    if(running){
+      interval= setInterval(()=>{
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    }
+    else if (! running){
+      clearInterval(interval); //if not running the timer is stopped
+    }
+    return() => clearInterval(interval);
+  }, [running])
 
-  // Function to toggle completed
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ))
-  }
-
-  // Function to delete a todo
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id))
-  }
-
-  return (
-    <div className="App">
-      <h1>My Todo List</h1>
-      
-      <div>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Add a new task..."
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
-        />
-        <button onClick={addTodo}>Add</button>
-      </div>
-
-      <ul>
-        {todos.map(todo => (
-          <li key={todo.id} style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-            />
-            {todo.text}
-            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
+  return(
+  <>
+  <h1>STOPWATCH</h1>
+  <div>
+    <span>{("0" + Math.floor((time/60000)%60)).slice(-2)}:</span>
+    <span>{("0" + Math.floor((time/1000)%60)).slice(-2)}:</span>
+    <span>{(("0" + Math.floor((time/10)%100))).slice(-2)}</span>
+  </div>
+  <div>
+    {running ? (
+      <button onClick={()=>{setRunning(false)}}>Stop</button> /* when the stop button is clicked the function stops running */
+    ):(
+    <button onClick={()=>{setRunning(true)}}>Start</button> /* when the start button is clicked the function runs*/
+    )}
+    <button onClick={()=>{setTime(0)}}>Reset</button>
+  </div>
+  </> 
+  );
 }
 
-export default App
+export default App;
